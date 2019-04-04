@@ -1,49 +1,135 @@
-<!-- from https://www.mathworks.com/help/thingspeak/embed-your-thingspeak-plots-on-web-pages.html -->
-<html>
-<head>
-    <title>G</title>
-</head>
-    <body background="#111111">
-        <table border=0 bordercolor="#00FFFF">
-            <tr>
-                <td>
-                    <iframe width="300" height="270" style="border: 0px solid #cccccc;"
-                            src="https://thingspeak.com/channels/738109/widgets/55066">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.5/all/gauge.min.js"></script>
+    <title>Garage</title>
 
-                    </iframe>
-                </td>
-                <td>
-                    <iframe width="300" height="270" style="border: 0px solid #cccccc;"
-                            src="https://thingspeak.com/channels/738109/widgets/55067">
+    <link href="https://fonts.googleapis.com/css?family=Dosis:400,700" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+  </head>
 
-                    </iframe>
-                </td>
-                <td>
-                    <iframe width="300" height="270" style="border: 0px solid #cccccc;"
-                            src="https://thingspeak.com/channels/738109/widgets/55066">
+  <body bgcolor="dimgray">
+    <div id="root">
+      <span id="clock" style="font-kerning: none; font-size: 40pt;">time</span>
+        <br/>
+      Last updated: <span id="updated">secs</span> seconds ago
+        <br/>
+      <canvas id="tempGauge">
+              <!--data-min-value="40" data-max-value="100" data-major-ticks="40, 50, 60, 70, 80, 90, 100" data-value-box-stroke="0"-->
+              <!--]' data-tick-side="right" data-number-side="right" data-needle-side="right" data-animation-rule="bounce"-->
+              <!--data-animation-duration="750" data-bar-stroke-width="3" data-value-box-border-radius="0" data-value-text-shadow="false"-->
+              <!--width="140" height="300" style="width: 120px; height: 300px;">-->
+      </canvas>
+      <canvas id="vccGauge"> </canvas>
+    </div>
 
-                    </iframe>
-                    <p> TODO: time since last update</p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <iframe width="300" height="270" style="border: 0px solid #cccccc;"
-                            src="https://thingspeak.com/channels/738109/widgets/55055">
+  <script type="text/javascript">
+    var clock = document.getElementById("clock")
+    var updated = document.getElementById("updated")
+    var curFontSize = 20
 
-                    </iframe>
-                </td>
-                <td>
-                    <iframe width="300" height="270" style="border: 0px solid #cccccc;"
-                            src="https://thingspeak.com/channels/738109/widgets/55056">
-                    </iframe>
-                </td>
-                <td>
-                    <iframe width="300" height="270" style="border: 0px solid #cccccc;"
-                            src="https://thingspeak.com/channels/738109/widgets/55068">
-                    </iframe>
-                </td>
-            </tr>
-        </table>
-    </body>
+    function updateClock() {
+        var d = new Date()
+        var s =
+          (10 > d.getHours  () ? "0" : "") + d.getHours  () + ":" +
+          (10 > d.getMinutes() ? "0" : "") + d.getMinutes() + ":" +
+          (10 > d.getSeconds() ? "0" : "") + d.getSeconds()
+        clock.textContent = s
+        setTimeout(updateClock, 1000 - d.getTime() % 1000 + 20)
+    }
+
+    updateClock()
+
+    var tempGauge = new LinearGauge({
+        renderTo: 'tempGauge',
+        width: 120,
+        height: 300,
+        units: "°F",
+        borderRadius: 20,
+        minValue: 40,
+        maxValue: 100,
+        majorTicks: [40, 50, 60, 70, 80, 90, 100],
+        minorTicks: 5,
+        highlights: [
+            {"from": 40, "to": 60, "color": "blue"},
+            {"from": 60, "to": 80, "color": "orange"},
+            {"from": 80, "to": 100, "color": "red"}
+        ],
+        animationDuration: 500,
+        valueBoxBorderRadius: 0,
+        colorValueBoxRect: "white",
+        valueDec: 1,
+        valueInt: 1
+    }).draw()
+
+    var vccGauge = new RadialGauge({
+        renderTo: 'vccGauge',
+        width: 150,
+        height: 150,
+        units: "Volt",
+        minValue: 2900,
+        maxValue: 3100,
+        fontNumbersSize: 30,
+        fontValueWeight: 60,
+        majorTicks: [ 2900, 2950, 3000, 3050, 3100 ],
+        minorTicks: 10,
+        strokeTicks: true,
+        highlights: [
+          { "from": 2900, "to": 2950, "color": "red" },
+          { "from": 2950, "to": 3050, "color": "gray" },
+          { "from": 3050, "to": 3100, "color": "green" }
+        ],
+        colorPlate: "#fff",
+        borderShadowWidth: 0,
+        borders: false,
+        needleType: "arrow",
+        needleWidth: 5,
+        needleCircleSize: 7,
+        needleCircleOuter: true,
+        needleCircleInner: false,
+        animationDuration: 1000,
+        animationRule: "linear"
+    }).draw()
+
+    function updateGauges() {
+        var request = new XMLHttpRequest()
+        var now = new Date().getTime()
+        request.open('GET', 'https://api.thingspeak.com/channels/738109/feeds.json?results=1', true)
+        request.onload = function () {
+          if (request.status >= 200 && request.status < 400) {
+            const app = document.getElementById('root')
+            var data = JSON.parse(this.response)
+            console.log(data)
+            data.feeds.forEach(e => {
+              var updatedAt = new Date(e.created_at)
+              var agoMsec = now - updatedAt
+
+              const h1 = document.createElement('h1')
+              app.appendChild(h1)
+              h1.textContent = JSON.stringify(e)
+
+              updated.textContent = Math.round(agoMsec / 1000)
+              if (agoMsec > 60000) {
+                updated.style.backgroundColor = "red"
+              } else {
+                updated.style.backgroundColor = "green"
+              }
+
+              tempGauge.value = e.field1
+              var humid = e.field2
+              var tilt = e.field3
+              vccGauge.value = e.field4
+            })
+          } else {
+            console.log('error')
+          }
+        }
+        request.send()
+        setTimeout(updateGauges, 20000)
+    }
+    updateGauges()
+    </script>
+  </body>
 </html>
