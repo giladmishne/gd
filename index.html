@@ -9,8 +9,8 @@
   </head>
 
   <body id="body" bgcolor="black">
-    <div id="root" style="font-size: 20pt;" align="center">
-      <span id="clock" style="font-kerning: none; font-size: 50pt;">time</span>
+    <div id="root" style="font-size: 18pt;" align="center">
+      <span id="clock" style="font-kerning: none; font-size: 44pt;">time</span>
         <br/><br/><br/>
       Temp: <span id="temp">deg</span> °F
         <br/><br/>
@@ -49,13 +49,16 @@
         clock.textContent = s
         setTimeout(updateClock, 1000 - d.getTime() % 1000 + 20)
     }
-    front.style.display = back.style.display = "block"
+    front.style.display = "block"
+    back.style.display = "block"
     updateClock()
 
     function updateState() {
         var request = new XMLHttpRequest()
         var now = new Date().getTime()
         var door = states.UNKNOWN
+        front.style.display = "block"
+        back.style.display = "block"
         request.open('GET', 'https://api.thingspeak.com/channels/738109/feeds.json?results=1', true)
         request.onload = function () {
           if (request.status >= 200 && request.status < 400) {
@@ -70,28 +73,25 @@
                 updated.style.backgroundColor = "green"
               }
               var dist = e.field3
-              if (dist > 180) {
+              if (dist > 150) {
                 door = states.DOOR_CLOSED_CAR_OUT
                 bgColor = "limegreen"
                 back.style.display = "none"
-              } else if (dist > 40) {
+              } else if (dist > 50) {
+                console.log(dist)
                 door = states.DOOR_CLOSED_CAR_IN
                 bgColor = "green"
-                if (dist > 60) {
-                  back.style.display = "block"
+                if (dist < 90) {
                   front.style.display = "none"
                 } else {
                   back.style.display = "none"
-                  front.style.display = "block"
                 }
               } else if (dist > 10) {
                 door = states.DOOR_OPEN
                 bgColor = "orangered"
-                front.style.display = back.style.display = "block"
               } else {
                 door = states.UNKNOWN
                 bgColor = "dimgray"
-                front.style.display = back.style.display = "block"
               }
               temp.textContent = e.field1
               hum.textContent = Math.round(e.field2)
