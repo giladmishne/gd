@@ -10,18 +10,18 @@
 
   <body id="body" bgcolor="black">
     <div id="root" style="font-size: 20pt;" align="center">
-      <span id="clock" style="font-kerning: none; font-size: 40pt;">time</span>
+      <span id="clock" style="font-kerning: none; font-size: 50pt;">time</span>
         <br/><br/><br/>
       Temp: <span id="temp">deg</span> °F
         <br/><br/>
-      Hum: <span id="hum">perc</span> %
+      Humidity: <span id="hum">perc</span> %
         <br/><br/>
       Updated: <span id="updated">secs</span> seconds ago
         <br/><br/>
-      State: <span id="state">state</span>
+      <span id="state">state</span>
         <br/><br/>
-      <span id="car-front"><img src="front.png" width="200pt"></span>
-      <span id="car-back"><img src="back.png" width="200pt"></span>
+      <span id="car-front"><img src="front.png" width="180pt"></span>
+      <span id="car-back"><img src="back.png" width="180pt"></span>
     </div>
 
   <script type="text/javascript">
@@ -34,10 +34,10 @@
     var back = document.getElementById("car-back")
     var curFontSize = 20
     const states = {
-      DOOR_CLOSED_CAR_IN: 'door closed, car in',
-      DOOR_CLOSED_CAR_OUT: 'door closed, car out',
-      DOOR_OPEN: 'door open',
-      UNKNOWN: 'unknown'
+      DOOR_CLOSED_CAR_IN: 'Door closed, car in',
+      DOOR_CLOSED_CAR_OUT: 'Door closed, car out',
+      DOOR_OPEN: 'Door open',
+      UNKNOWN: 'Unknown'
     }
 
     function updateClock() {
