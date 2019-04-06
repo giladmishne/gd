@@ -9,17 +9,19 @@
   </head>
 
   <body id="body" bgcolor="black">
-    <div id="root" style="font-size: 20pt;">
+    <div id="root" style="font-size: 20pt;" align="center">
       <span id="clock" style="font-kerning: none; font-size: 40pt;">time</span>
-        <br/>
+        <br/><br/><br/>
       Temp: <span id="temp">deg</span> °F
-        <br/>
+        <br/><br/>
       Hum: <span id="hum">perc</span> %
-        <br/>
-      Last updated: <span id="updated">secs</span> seconds ago
-        <br/>
+        <br/><br/>
+      Updated: <span id="updated">secs</span> seconds ago
+        <br/><br/>
       State: <span id="state">state</span>
-        <br/>
+        <br/><br/>
+      <span id="car-front"><img src="front.png" width="200pt"></span>
+      <span id="car-back"><img src="back.png" width="200pt"></span>
     </div>
 
   <script type="text/javascript">
@@ -28,6 +30,8 @@
     var temp = document.getElementById("temp")
     var hum = document.getElementById("hum")
     var state = document.getElementById("state")
+    var front = document.getElementById("car-front")
+    var back = document.getElementById("car-back")
     var curFontSize = 20
     const states = {
       DOOR_CLOSED_CAR_IN: 'door closed, car in',
@@ -45,7 +49,7 @@
         clock.textContent = s
         setTimeout(updateClock, 1000 - d.getTime() % 1000 + 20)
     }
-
+    front.style.display = back.style.display = "block"
     updateClock()
 
     function updateState() {
@@ -69,18 +73,28 @@
               if (dist > 180) {
                 door = states.DOOR_CLOSED_CAR_OUT
                 bgColor = "limegreen"
-              } else if (dist > 50) {
+                back.style.display = "none"
+              } else if (dist > 40) {
                 door = states.DOOR_CLOSED_CAR_IN
                 bgColor = "green"
+                if (dist > 60) {
+                  back.style.display = "block"
+                  front.style.display = "none"
+                } else {
+                  back.style.display = "none"
+                  front.style.display = "block"
+                }
               } else if (dist > 10) {
                 door = states.DOOR_OPEN
                 bgColor = "orangered"
+                front.style.display = back.style.display = "block"
               } else {
                 door = states.UNKNOWN
                 bgColor = "dimgray"
+                front.style.display = back.style.display = "block"
               }
               temp.textContent = e.field1
-              hum.textContent = e.field2
+              hum.textContent = Math.round(e.field2)
               state.textContent = door
               document.body.style.backgroundColor = bgColor
             })
