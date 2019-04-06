@@ -54,58 +54,59 @@
     updateClock()
 
     function updateState() {
-        var request = new XMLHttpRequest()
-        var now = new Date().getTime()
-        var door = states.UNKNOWN
-        front.style.display = "block"
-        back.style.display = "block"
-        request.open('GET', 'https://api.thingspeak.com/channels/738109/feeds.json?results=1', true)
-        request.onload = function () {
-          if (request.status >= 200 && request.status < 400) {
-            var data = JSON.parse(this.response)
-            data.feeds.forEach(e => {
-              var updatedAt = new Date(e.created_at)
-              var agoMsec = now - updatedAt
-              updated.textContent = Math.round(agoMsec / 1000)
-              if (agoMsec > 60000) {
-                updated.style.backgroundColor = "red"
+      front.style.display = "block"
+      back.style.display = "block"
+      var request = new XMLHttpRequest()
+      var now = new Date().getTime()
+      var door = states.UNKNOWN
+      request.open('GET', 'https://api.thingspeak.com/channels/738109/feeds.json?results=1', true)
+      request.onload = function () {
+        if (request.status >= 200 && request.status < 400) {
+          var data = JSON.parse(this.response)
+          data.feeds.forEach(e => {
+            var updatedAt = new Date(e.created_at)
+            var agoMsec = now - updatedAt
+            updated.textContent = Math.round(agoMsec / 1000)
+            if (agoMsec > 60000) {
+              updated.style.backgroundColor = "red"
+            } else {
+              updated.style.backgroundColor = "green"
+            }
+            var dist = e.field3
+            if (dist > 150) {
+              door = states.DOOR_CLOSED_CAR_OUT
+              bgColor = "limegreen"
+              back.style.display = "none"
+            } else if (dist > 50) {
+              console.log(dist)
+              door = states.DOOR_CLOSED_CAR_IN
+              bgColor = "green"
+              if (dist < 90) {
+                front.style.display = "none"
               } else {
-                updated.style.backgroundColor = "green"
-              }
-              var dist = e.field3
-              if (dist > 150) {
-                door = states.DOOR_CLOSED_CAR_OUT
-                bgColor = "limegreen"
                 back.style.display = "none"
-              } else if (dist > 50) {
-                console.log(dist)
-                door = states.DOOR_CLOSED_CAR_IN
-                bgColor = "green"
-                if (dist < 90) {
-                  front.style.display = "none"
-                } else {
-                  back.style.display = "none"
-                }
-              } else if (dist > 10) {
-                door = states.DOOR_OPEN
-                bgColor = "orangered"
-              } else {
-                door = states.UNKNOWN
-                bgColor = "dimgray"
               }
-              temp.textContent = e.field1
-              hum.textContent = Math.round(e.field2)
-              state.textContent = door
-              document.body.style.backgroundColor = bgColor
-            })
-          } else {
-            console.log('error')
-          }
-          console.log(data)
+            } else if (dist > 10) {
+              door = states.DOOR_OPEN
+              bgColor = "orangered"
+            } else {
+              door = states.UNKNOWN
+              bgColor = "dimgray"
+            }
+            temp.textContent = e.field1
+            hum.textContent = Math.round(e.field2)
+            state.textContent = door
+            document.body.style.backgroundColor = bgColor
+          })
+        } else {
+          console.log('error')
         }
-        request.send()
-        setTimeout(updateState, 19000)
+        console.log(data)
+      }
+      request.send()
+      setTimeout(updateState, 19000)
     }
+
     updateState()
     </script>
   </body>
