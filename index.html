@@ -10,8 +10,9 @@
 
   <body id="body" bgcolor="black">
     <div id="root" style="font-size: 18pt;" align="center">
-      <span id="clock" style="font-kerning: none; font-size: 44pt;">time</span>
-        <br/><br/><br/>
+        <br/><br/>
+      <span id="clock" style="font-kerning: none; font-size: 36pt;">time</span>
+        <br/><br/>
       Temp: <span id="temp">deg</span> °F
         <br/><br/>
       Humidity: <span id="hum">perc</span> %
@@ -52,13 +53,13 @@
     updateClock()
 
     function updateState() {
-      front.style.display = "none"
-      back.style.display = "none"
       var request = new XMLHttpRequest()
       var now = new Date().getTime()
       var door = states.UNKNOWN
       request.open('GET', 'https://api.thingspeak.com/channels/738109/feeds.json?results=1', true)
       request.onload = function () {
+        front.style.display = "none"
+        back.style.display = "none"
         if (request.status >= 200 && request.status < 400) {
           var data = JSON.parse(this.response)
           data.feeds.forEach(e => {
