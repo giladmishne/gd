@@ -49,13 +49,11 @@
         clock.textContent = s
         setTimeout(updateClock, 1000 - d.getTime() % 1000 + 20)
     }
-    front.style.display = "block"
-    back.style.display = "block"
     updateClock()
 
     function updateState() {
-      front.style.display = "block"
-      back.style.display = "block"
+      front.style.display = "none"
+      back.style.display = "none"
       var request = new XMLHttpRequest()
       var now = new Date().getTime()
       var door = states.UNKNOWN
@@ -76,15 +74,14 @@
             if (dist > 150) {
               door = states.DOOR_CLOSED_CAR_OUT
               bgColor = "limegreen"
-              back.style.display = "none"
             } else if (dist > 50) {
-              console.log(dist)
+            console.log(dist)
               door = states.DOOR_CLOSED_CAR_IN
               bgColor = "green"
-              if (dist < 90) {
-                front.style.display = "none"
+              if (dist > 90) {
+                front.style.display = "block"
               } else {
-                back.style.display = "none"
+                back.style.display = "block"
               }
             } else if (dist > 10) {
               door = states.DOOR_OPEN
